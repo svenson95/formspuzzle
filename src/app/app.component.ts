@@ -1,11 +1,16 @@
-import { Component } from '@angular/core';
-import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { IonApp, IonContent, IonRouterOutlet } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'fp-root',
-  templateUrl: 'app.component.html',
-  imports: [IonApp, IonRouterOutlet],
+  template: `
+    <ion-app>
+      <ion-content [fullscreen]="true">
+        <ion-router-outlet></ion-router-outlet>
+      </ion-content>
+    </ion-app>
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [IonApp, IonContent, IonRouterOutlet],
 })
-export class AppComponent {
-  constructor() {}
-}
+export class AppComponent {}
