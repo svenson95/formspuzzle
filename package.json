@@ -9,7 +9,10 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "tests-unit": "ng test --watch=false",
+    "tests-e2e": "npx playwright test --project=fp-tests",
+    "tests-e2e-ui": "npx playwright test --project=fp-tests --ui"
   },
   "private": true,
   "dependencies": {

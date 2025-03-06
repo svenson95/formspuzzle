@@ -72,6 +72,12 @@ export default defineConfig({
     //   name: 'Google Chrome',
     //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
     // },
+    {
+      name: 'fp-tests',
+      testDir: './e2e/playwright/tests',
+      testMatch: /.*.spec.ts/,
+      use: { ...devices['iPhone 12'] },
+    },
   ],
 
   /* Run your local dev server before starting the tests */

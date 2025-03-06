@@ -16,7 +16,7 @@ import { PuzzleService } from '../../services';
       padding-block: 3rem;
     }
 
-    #choose-map-selection {
+    #choose-map-preview {
       position: absolute;
       top: 50%;
       left: 50%;
@@ -38,12 +38,12 @@ import { PuzzleService } from '../../services';
   `,
   template: `
     <section id="choose-map-header">Karte wählen</section>
-    <section id="choose-map-selection">
+    <section id="choose-map-preview">
       <!-- @for (map of maps; track map.name) { -->
       <fp-puzzle-board
         class="preview"
+        data-testid="map-preview"
         [map]="defaultMap"
-        data-testid="puzzle-board-preview"
         #board
       />
       <!-- } -->
