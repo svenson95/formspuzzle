@@ -11,4 +11,20 @@
   --fp-color-grey: #222;
   --fp-color-brown: #9d5b00;
   --fp-color-white: #eee;
+
+  // Ionic theme colors
+  --ion-color-primary: #ffd700;
+  --ion-color-primary-rgb: 255, 215, 0;
+  --ion-color-primary-contrast: #000;
+  --ion-color-primary-contrast-rgb: 0, 0, 0;
+  --ion-color-primary-shade: #c9ab00;
+  --ion-color-primary-tint: #ffeb78;
+}
+
+ion-button {
+  --border-radius: 0;
+
+  &:not(:active) {
+    --box-shadow: 0 2px 4px #00000025;
+  }
 }

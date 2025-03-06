@@ -32,7 +32,7 @@ import { PuzzleGrid } from '../../../models';
     }
 
     .cell.filled {
-      background-color: var(--fp-color-brown);
+      background-color: var(--ion-color-primary);
     }
   `,
   template: `
