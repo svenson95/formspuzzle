@@ -6,6 +6,7 @@ import {
 } from '@angular/core';
 
 import { PuzzleBoardComponent } from '../../components';
+import { PUZZLE_MAPS } from '../../data';
 import { PuzzleMap } from '../../models';
 import { PuzzleService } from '../../services';
 
@@ -39,6 +40,9 @@ export class GamePage {
   selectedMap = computed<PuzzleMap>(() => {
     const map = this.puzzle.selectedMap();
     if (map === undefined) {
+      const stored = localStorage.getItem('selected-map');
+      const storedMap = PUZZLE_MAPS.find((p) => p.name === stored);
+      if (storedMap) return storedMap;
       throw new Error('Map should be defined in game page');
     }
     return map;

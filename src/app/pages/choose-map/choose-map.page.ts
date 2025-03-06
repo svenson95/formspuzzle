@@ -73,5 +73,6 @@ export class ChooseMapPage {
 
   onRouting(map: PuzzleMap): void {
     this.puzzle.selectedMap.set(map);
+    localStorage.setItem('selected-map', map.name);
   }
 }
