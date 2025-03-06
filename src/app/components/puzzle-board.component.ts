@@ -87,6 +87,8 @@ export class PuzzleBoardComponent {
   }
 
   isHovered(row: number, col: number): boolean {
-    return this.occupiedTiles()[row][col] === 1 ? true : false;
+    const tiles = this.occupiedTiles();
+    if (!tiles) return false;
+    return tiles[row][col] === 2 ? true : false;
   }
 }

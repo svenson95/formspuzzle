@@ -6,8 +6,9 @@ import {
   input,
 } from '@angular/core';
 
-import { PuzzleService } from 'src/app/services';
+import { EMPTY_MAP } from '../../../data';
 import { PuzzleGrid } from '../../../models';
+import { PuzzleService } from '../../../services';
 
 @Component({
   styles: `
@@ -21,7 +22,7 @@ import { PuzzleGrid } from '../../../models';
       display: flex;
     }
 
-    .cell {
+    .piece-tile {
       width: var(--fp-grid-default);
       height: var(--fp-grid-default);
       display: inline-block;
@@ -30,25 +31,25 @@ import { PuzzleGrid } from '../../../models';
         width: var(--fp-grid-small);
         height: var(--fp-grid-small);
       }
-    }
 
-    .cell.filled {
-      background-color: var(--ion-color-primary);
+      &.is-part-of-piece {
+        background-color: var(--ion-color-primary);
+      }
     }
   `,
   template: `
     <div
       class="piece"
       [style.transform]="rotation ? 'rotate(' + rotation + 'deg)' : ''"
-      (click)="rotatePiece()"
       cdkDrag
+      [cdkDragFreeDragPosition]="dragPosition"
+      (cdkDragMoved)="onDrag($event, piece())"
       (cdkDragEnded)="onDrop($event, piece())"
-      (cdkDragMoved)="onDrag($event)"
     >
       @for (row of piece(); track $index) {
       <div class="row">
         @for (cell of row; track $index) {
-        <div class="cell" [class.filled]="cell === 1"></div>
+        <div class="piece-tile" [class.is-part-of-piece]="cell === 1"></div>
         }
       </div>
       }
@@ -64,63 +65,27 @@ export class PuzzlePieceComponent {
 
   puzzle = inject(PuzzleService);
 
-  rotation: number = 0;
   gridSize: number = 20;
+  rotation: number = 0;
+  dragPosition = { x: 0, y: 0 };
 
-  rotatePiece(): void {
-    // this.rotation = (this.rotation + 90) % 360;
-    // const pieceMatrix = this.rotateMatrix(this.piece());
-    // this.piece2.set(pieceMatrix);
-  }
+  onDrag(event: CdkDragMove, piece: PuzzleGrid): void {
+    const pieceElement = event.source.element.nativeElement;
+    const pieceRect = pieceElement.getBoundingClientRect();
 
-  rotateMatrix(matrix: PuzzleGrid): PuzzleGrid {
-    const n = matrix.length;
-    let result: PuzzleGrid = [];
-    for (let i = 0; i < n; i++) {
-      result[i] = [];
-      for (let j = 0; j < n; j++) {
-        result[i][j] = matrix[n - j - 1][i];
-      }
-    }
-    return result;
-  }
+    const data: PuzzleGrid = EMPTY_MAP.grid.map((x) => Object.assign([], x));
+    this.getHoveredCellIds(pieceRect, piece).forEach((tile: Element) => {
+      const id: string = tile.getAttribute('id') || 'INVALID-CELL-ID';
+      const cellRow = Number(id.split('-')[1]);
+      const cellCol = Number(id.split('-')[2]);
 
-  onDrag(event: CdkDragMove): void {
-    // console.log('drag start', event);
-  }
-
-  onDrop(event: CdkDragEnd, piece: PuzzleGrid): void {
-    console.log('element', event);
-
-    const dropPoint = event.dropPoint;
-
-    // const allDropPointElements = document.elementsFromPoint(
-    //   dropPoint.x,
-    //   dropPoint.y
-    // );
-    // const elements = allDropPointElements.filter((v) =>
-    //   v.classList.contains('board-cell')
-    // );
-    const pieceRect =
-      event.source.element.nativeElement.getBoundingClientRect();
-    console.log('hovered grids', this.getHoveredCellIds(pieceRect, piece));
-    console.log('TEST', this.puzzle.occupiedTiles());
-
-    this.getHoveredCellIds(pieceRect, piece).forEach((cell: string) => {
-      const cellRow = Number(cell.substring(5, cell.lastIndexOf('-')));
-      const cellCol = Number(
-        cell.substring(cell.lastIndexOf('-') + 1, cell.length)
-      );
-
-      const data = [...this.puzzle.occupiedTiles()];
-      data[cellRow - 1][cellCol - 1] = 1;
-      this.puzzle.occupiedTiles.set(data);
+      data[cellRow - 1][cellCol - 1] = 2;
     });
+    this.puzzle.occupiedTiles.set(data);
   }
 
-  getHoveredCellIds(dropPoint: DOMRect, piece: PuzzleGrid): string[] {
-    console.log('dropPoint', dropPoint);
-    const hoveredCells: string[] = [];
+  private getHoveredCellIds(dropPoint: DOMRect, piece: PuzzleGrid): Element[] {
+    const hoveredCells: Element[] = [];
     const cellWidth = dropPoint.width / piece[0].length;
     const cellHeight = dropPoint.height / piece.length;
     const halfCellWidth = cellWidth / 2;
@@ -134,17 +99,15 @@ export class PuzzlePieceComponent {
           const tile = document
             .elementsFromPoint(cellX, cellY)
             .filter((v) => v.classList.contains('board-cell'))[0];
-
-          const tileId = tile.getAttribute('id');
-          if (typeof tileId !== 'string') {
-            throw new Error(
-              'Get Hovered Cells failed during tile.getAttribute() method'
-            );
-          }
-          hoveredCells.push(tileId);
+          if (!tile) return [];
+          hoveredCells.push(tile);
         }
       }
     }
     return hoveredCells;
+  }
+
+  onDrop(event: CdkDragEnd, piece: PuzzleGrid): void {
+    // should align the piece into the grid
   }
 }
