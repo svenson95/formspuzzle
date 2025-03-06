@@ -45,16 +45,14 @@ import { PuzzleService } from '../services';
         width: var(--fp-grid-small);
         height: var(--fp-grid-small);
       }
-    }
 
-    .board-cell {
       &.is-part-of-map {
         background-color: #ddd;
         border: 1px solid #ccc;
       }
 
       &.is-hovered.is-part-of-map {
-        background-color: red;
+        background-color: #ccc;
       }
     }
   `,
