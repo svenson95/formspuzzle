@@ -13,9 +13,17 @@ import { PuzzleFormsComponent } from './components';
 
 @Component({
   styles: `
-    
+    .game-header {
+      display: flex;
+      gap: 1rem;
+      padding: 1.5rem;
+    }
   `,
   template: `
+    <section class="game-header">
+      <div>Zeit:</div>
+      <div>00:00</div>
+    </section>
     <fp-puzzle-board #board [map]="selectedMap()" />
     <fp-puzzle-forms
       [grid]="selectedMap().grid"
