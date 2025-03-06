@@ -10,17 +10,20 @@ import { PuzzleGrid } from '../../../models';
 import { PuzzlePieceComponent } from './puzzle-piece.component';
 
 @Component({
-  styles: ``,
+  styles: `
+    :host {
+      background-color: var(--fp-color-white);
+      margin-bottom: 2rem;
+    }
+  `,
   template: `
-    <div class="pieces">
-      @for (piece of pieces; track $index) {
-      <fp-puzzle-piece
-        [piece]="piece"
-        [grid]="grid()"
-        [occupiedTiles]="occupiedTiles()"
-      />
-      }
-    </div>
+    @for (piece of pieces; track $index) {
+    <fp-puzzle-piece
+      [piece]="piece"
+      [grid]="grid()"
+      [occupiedTiles]="occupiedTiles()"
+    />
+    }
   `,
   selector: 'fp-puzzle-forms',
   changeDetection: ChangeDetectionStrategy.OnPush,
