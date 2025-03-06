@@ -62,7 +62,7 @@ export class PuzzlePieceComponent {
   grid = input.required<PuzzleGrid>();
   occupiedTiles = input.required<WritableSignal<PuzzleGrid>>();
   rotation: number = 0;
-  gridSize: number = 25;
+  gridSize: number = 20;
 
   rotatePiece(): void {
     // this.rotation = (this.rotation + 90) % 360;
