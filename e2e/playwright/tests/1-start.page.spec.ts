@@ -1,33 +1,38 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from '../poms';
 
-const PLAY_BUTTON_TESTID = 'play-button';
-
-test.beforeEach(async ({ page }) => {
-  await page.goto('/start');
+test.beforeEach(async ({ page, startPage }) => {
+  await page.goto(startPage.URL_WITH_PREFIX);
 });
 
 test.describe('StartPage', () => {
-  test('has play button', async ({ page }) => {
+  test('has play button', async ({ startPage, chooseMapPage }) => {
     // Arrange: Get the start button.
-    const playButton = page.getByTestId(PLAY_BUTTON_TESTID);
+    const playButton = startPage.getPlayButton();
 
     // Assert: play button is clickable and have proper label
     await expect(playButton).toBeEnabled();
     await expect(playButton).toHaveText('SPIELEN');
-    await expect(playButton).toHaveAttribute('routerLink', '/choose-map');
+    await expect(playButton).toHaveAttribute(
+      'routerLink',
+      chooseMapPage.URL_WITH_PREFIX
+    );
   });
 
   test('should redirect to choose-map after click play-button', async ({
     page,
+    startPage,
+    chooseMapPage,
   }) => {
     // Arrange: Get the start button.
-    const playButton = page.getByTestId(PLAY_BUTTON_TESTID);
+    await startPage.isReady();
+    await expect(page).toHaveURL(startPage.URL);
+    const playButton = startPage.getPlayButton();
 
     // Act: click on start-button
-    await expect(page).toHaveURL('start');
     await playButton.click();
 
     // Assert: play button is clickable and have proper label
-    await expect(page).toHaveURL('choose-map');
+    await chooseMapPage.isReady();
+    await expect(page).toHaveURL(chooseMapPage.URL);
   });
 });

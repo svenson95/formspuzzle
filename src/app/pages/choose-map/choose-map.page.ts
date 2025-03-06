@@ -42,7 +42,7 @@ import { PuzzleService } from '../../services';
       <!-- @for (map of maps; track map.name) { -->
       <fp-puzzle-board
         class="preview"
-        data-testid="map-preview"
+        data-testid="choose-map-preview"
         [map]="defaultMap"
         #board
       />
@@ -50,7 +50,7 @@ import { PuzzleService } from '../../services';
     </section>
     <section id="choose-map-menu">
       <ion-button
-        data-testid="start-button"
+        data-testid="choose-map-start-button"
         routerLink="/game"
         (click)="onRouting(defaultMap)"
       >
@@ -58,6 +58,9 @@ import { PuzzleService } from '../../services';
       </ion-button>
     </section>
   `,
+  host: {
+    'data-testid': 'choose-map-page-root',
+  },
   selector: 'fp-choose-map-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [IonButton, RouterLink, PuzzleBoardComponent],

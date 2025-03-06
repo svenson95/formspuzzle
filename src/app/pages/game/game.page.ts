@@ -22,6 +22,9 @@ import { PuzzleFormsComponent } from './components';
       [occupiedTiles]="board.occupiedTiles"
     />
   `,
+  host: {
+    'data-testid': 'game-page-root',
+  },
   selector: 'fp-game-page',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [PuzzleBoardComponent, PuzzleFormsComponent],
