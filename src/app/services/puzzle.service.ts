@@ -1,9 +1,11 @@
 import { Injectable, signal } from '@angular/core';
 
-import { PuzzleMap } from '../models';
+import { EMPTY_MAP } from '../data';
+import { PuzzleGrid, PuzzleMap } from '../models';
 
 @Injectable()
 export class PuzzleService {
   isGameStarted = signal<boolean>(false);
   selectedMap = signal<PuzzleMap | undefined>(undefined);
+  occupiedTiles = signal<PuzzleGrid>(EMPTY_MAP.grid); // TODO init value should be selected map
 }

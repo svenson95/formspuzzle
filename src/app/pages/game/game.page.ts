@@ -24,11 +24,8 @@ import { PuzzleFormsComponent } from './components';
       <div>Zeit:</div>
       <div>00:00</div>
     </section>
-    <fp-puzzle-board #board [map]="selectedMap()" />
-    <fp-puzzle-forms
-      [grid]="selectedMap().grid"
-      [occupiedTiles]="board.occupiedTiles"
-    />
+    <fp-puzzle-board [map]="selectedMap()" />
+    <fp-puzzle-forms [grid]="selectedMap().grid" />
   `,
   host: {
     'data-testid': 'game-page-root',

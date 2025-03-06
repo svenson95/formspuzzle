@@ -2,12 +2,12 @@ import {
   ChangeDetectionStrategy,
   Component,
   HostBinding,
+  inject,
   input,
-  signal,
 } from '@angular/core';
 
-import { PUZZLE_MAPS } from '../data';
-import { PuzzleGrid, PuzzleMap } from '../models';
+import { PuzzleMap } from '../models';
+import { PuzzleService } from '../services';
 
 @Component({
   styles: `
@@ -37,7 +37,7 @@ import { PuzzleGrid, PuzzleMap } from '../models';
       }
     }
 
-    .cell {
+    .board-cell {
       width: var(--fp-grid-default);
       height: var(--fp-grid-default);
 
@@ -47,20 +47,27 @@ import { PuzzleGrid, PuzzleMap } from '../models';
       }
     }
 
-    .cell.active {
-      background-color: #ddd;
-      border: 1px solid #ccc;
+    .board-cell {
+      &.is-part-of-map {
+        background-color: #ddd;
+        border: 1px solid #ccc;
+      }
+
+      &.is-hovered.is-part-of-map {
+        background-color: red;
+      }
     }
   `,
   template: `
     <div class="grid">
       @for (row of map().grid; track $index; let rowIndex = $index) {
-      <div class="row" [id]="'grid-row-' + rowIndex + 1">
+      <div class="row">
         @for (cell of row; track $index; let colIndex = $index) {
         <div
-          class="cell"
-          [id]="'grid-cell-row-' + rowIndex + '-col-' + colIndex"
-          [class.active]="cell === 1"
+          class="board-cell"
+          [id]="'cell-' + (rowIndex + 1) + '-' + (colIndex + 1)"
+          [class.is-part-of-map]="cell === 1"
+          [class.is-hovered]="isHovered(rowIndex, colIndex)"
         ></div>
         }
       </div>
@@ -73,9 +80,15 @@ import { PuzzleGrid, PuzzleMap } from '../models';
 })
 export class PuzzleBoardComponent {
   map = input.required<PuzzleMap>();
-  occupiedTiles = signal<PuzzleGrid>(PUZZLE_MAPS[0].grid);
+
+  puzzle = inject(PuzzleService);
+  occupiedTiles = this.puzzle.occupiedTiles;
 
   @HostBinding('attr.puzzle') get setPuzzleNameOnHost(): string {
     return this.map().name;
+  }
+
+  isHovered(row: number, col: number): boolean {
+    return this.occupiedTiles()[row][col] === 1 ? true : false;
   }
 }

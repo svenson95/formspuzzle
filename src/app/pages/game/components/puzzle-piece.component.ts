@@ -1,11 +1,12 @@
-import { CdkDrag, CdkDragEnd, CdkDragStart } from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragEnd, CdkDragMove } from '@angular/cdk/drag-drop';
 import {
   ChangeDetectionStrategy,
   Component,
+  inject,
   input,
-  WritableSignal,
 } from '@angular/core';
 
+import { PuzzleService } from 'src/app/services';
 import { PuzzleGrid } from '../../../models';
 
 @Component({
@@ -42,7 +43,7 @@ import { PuzzleGrid } from '../../../models';
       (click)="rotatePiece()"
       cdkDrag
       (cdkDragEnded)="onDrop($event, piece())"
-      (cdkDragStarted)="onDrag($event)"
+      (cdkDragMoved)="onDrag($event)"
     >
       @for (row of piece(); track $index) {
       <div class="row">
@@ -60,7 +61,9 @@ import { PuzzleGrid } from '../../../models';
 export class PuzzlePieceComponent {
   piece = input.required<PuzzleGrid>();
   grid = input.required<PuzzleGrid>();
-  occupiedTiles = input.required<WritableSignal<PuzzleGrid>>();
+
+  puzzle = inject(PuzzleService);
+
   rotation: number = 0;
   gridSize: number = 20;
 
@@ -82,48 +85,66 @@ export class PuzzlePieceComponent {
     return result;
   }
 
-  onDrag(event: CdkDragStart): void {
+  onDrag(event: CdkDragMove): void {
     // console.log('drag start', event);
   }
 
   onDrop(event: CdkDragEnd, piece: PuzzleGrid): void {
-    console.log('dropped', event);
-    console.log('piece', piece);
+    console.log('element', event);
 
-    const { x, y } = event.dropPoint;
-    const dragPosition = event.source.getFreeDragPosition();
+    const dropPoint = event.dropPoint;
 
-    const cells = this.getCellsInPieceArea(
-      dragPosition,
-      event.dropPoint,
-      piece
-    );
-    console.log('cells', cells);
+    // const allDropPointElements = document.elementsFromPoint(
+    //   dropPoint.x,
+    //   dropPoint.y
+    // );
+    // const elements = allDropPointElements.filter((v) =>
+    //   v.classList.contains('board-cell')
+    // );
+    const pieceRect =
+      event.source.element.nativeElement.getBoundingClientRect();
+    console.log('hovered grids', this.getHoveredCellIds(pieceRect, piece));
+    console.log('TEST', this.puzzle.occupiedTiles());
+
+    this.getHoveredCellIds(pieceRect, piece).forEach((cell: string) => {
+      const cellRow = Number(cell.substring(5, cell.lastIndexOf('-')));
+      const cellCol = Number(
+        cell.substring(cell.lastIndexOf('-') + 1, cell.length)
+      );
+
+      const data = [...this.puzzle.occupiedTiles()];
+      data[cellRow - 1][cellCol - 1] = 1;
+      this.puzzle.occupiedTiles.set(data);
+    });
   }
 
-  getCellsInPieceArea(
-    dragPosition: { x: number; y: number },
-    dropPoint: { x: number; y: number },
-    piece: PuzzleGrid
-  ) {
-    const cells: { row: number; col: number }[] = [];
+  getHoveredCellIds(dropPoint: DOMRect, piece: PuzzleGrid): string[] {
+    console.log('dropPoint', dropPoint);
+    const hoveredCells: string[] = [];
+    const cellWidth = dropPoint.width / piece[0].length;
+    const cellHeight = dropPoint.height / piece.length;
+    const halfCellWidth = cellWidth / 2;
+    const halfCellHeight = cellHeight / 2;
 
-    // Convert dropPoint to grid coordinates
-    const startCol = Math.round(dragPosition.x / this.gridSize);
-    const startRow = Math.round(dragPosition.y / this.gridSize);
-
-    // Loop through piece matrix
     for (let row = 0; row < piece.length; row++) {
       for (let col = 0; col < piece[row].length; col++) {
         if (piece[row][col] === 1) {
-          cells.push({
-            row: startRow + row,
-            col: startCol + col,
-          });
+          const cellX = dropPoint.x + col * cellWidth + halfCellWidth;
+          const cellY = dropPoint.y + row * cellHeight + halfCellHeight;
+          const tile = document
+            .elementsFromPoint(cellX, cellY)
+            .filter((v) => v.classList.contains('board-cell'))[0];
+
+          const tileId = tile.getAttribute('id');
+          if (typeof tileId !== 'string') {
+            throw new Error(
+              'Get Hovered Cells failed during tile.getAttribute() method'
+            );
+          }
+          hoveredCells.push(tileId);
         }
       }
     }
-
-    return cells;
+    return hoveredCells;
   }
 }
