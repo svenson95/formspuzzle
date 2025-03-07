@@ -6,7 +6,7 @@ import {
   input,
 } from '@angular/core';
 
-import { PuzzleMap } from '../models';
+import { PuzzleMap, PuzzleTileState } from '../models';
 import { PuzzleService } from '../services';
 
 @Component({
@@ -64,7 +64,7 @@ import { PuzzleService } from '../services';
         <div
           class="board-cell"
           [id]="'cell-' + (rowIndex + 1) + '-' + (colIndex + 1)"
-          [class.is-part-of-map]="cell === 1"
+          [class.is-part-of-map]="cell === PuzzleTileState.TILE"
           [class.is-hovered]="isHovered(rowIndex, colIndex)"
         ></div>
         }
@@ -77,18 +77,20 @@ import { PuzzleService } from '../services';
   imports: [],
 })
 export class PuzzleBoardComponent {
-  map = input.required<PuzzleMap>();
+  readonly PuzzleTileState = PuzzleTileState;
 
+  map = input.required<PuzzleMap>();
   puzzle = inject(PuzzleService);
   occupiedTiles = this.puzzle.occupiedTiles;
 
-  @HostBinding('attr.puzzle') get setPuzzleNameOnHost(): string {
+  @HostBinding('attr.puzzle')
+  get setPuzzleNameOnHost(): string {
     return this.map().name;
   }
 
   isHovered(row: number, col: number): boolean {
     const tiles = this.occupiedTiles();
     if (!tiles) return false;
-    return tiles[row][col] === 2 ? true : false;
+    return tiles[row][col] === PuzzleTileState.IS_HOVERED ? true : false;
   }
 }

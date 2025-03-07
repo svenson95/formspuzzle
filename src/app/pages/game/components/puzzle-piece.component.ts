@@ -47,7 +47,10 @@ import { PuzzleService } from '../../../services';
       @for (row of piece(); track $index) {
       <div class="row">
         @for (cell of row; track $index) {
-        <div class="piece-tile" [class.is-part-of-piece]="cell === 1"></div>
+        <div
+          class="piece-tile"
+          [class.is-part-of-piece]="cell === PuzzleTileState.TILE"
+        ></div>
         }
       </div>
       }
@@ -58,10 +61,12 @@ import { PuzzleService } from '../../../services';
   imports: [CdkDrag],
 })
 export class PuzzlePieceComponent {
+  readonly PuzzleTileState = PuzzleTileState;
+  readonly gridSize: number = 20;
+
   readonly piece = input.required<PuzzleGrid>();
   readonly puzzle = inject(PuzzleService);
 
-  readonly gridSize: number = 20;
   dragPosition = { x: 0, y: 0 };
 
   onDrag(event: CdkDragMove): void {
@@ -77,10 +82,10 @@ export class PuzzlePieceComponent {
     this.getHoveredCellIds(pieceRect).forEach((cell: Element) => {
       const id = cell.getAttribute('id');
       if (!id) throw new Error('Board cell attribute id is null');
-      const rowIndex = Number(id.split('-')[1]) - 1;
-      const colIndex = Number(id.split('-')[2]) - 1;
+      const row = Number(id.split('-')[1]) - 1;
+      const col = Number(id.split('-')[2]) - 1;
 
-      tiles[rowIndex][colIndex] = PuzzleTileState.IS_HOVERED;
+      tiles[row][col] = PuzzleTileState.IS_HOVERED;
     });
 
     this.puzzle.occupiedTiles.set(tiles);
