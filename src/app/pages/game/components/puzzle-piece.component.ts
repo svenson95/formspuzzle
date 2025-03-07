@@ -66,35 +66,20 @@ export class PuzzlePieceComponent {
   readonly piece = input.required<PuzzleGrid>();
   readonly puzzle = inject(PuzzleService);
 
+  hoveredCells: Element[] = [];
   dragPosition = { x: 0, y: 0 };
 
   onDrag(event: CdkDragMove): void {
     const { nativeElement } = event.source.element;
     const pieceRect = nativeElement.getBoundingClientRect();
 
+    this.setHoveredCells(pieceRect);
     this.updateHoveredTiles(PuzzleTileState.TILE);
     this.setHoveredCellsState(pieceRect);
   }
 
-  private setHoveredCellsState(pieceRect: DOMRect): void {
-    const tiles: PuzzleGrid = this.puzzle
-      .occupiedTiles()
-      .map((x) => Object.assign([], x));
-
-    this.getHoveredCellIds(pieceRect).forEach((cell: Element) => {
-      const id = cell.getAttribute('id');
-      if (!id) throw new Error('Board cell attribute id is null');
-      const row = Number(id.split('-')[1]) - 1;
-      const col = Number(id.split('-')[2]) - 1;
-
-      tiles[row][col] = PuzzleTileState.IS_HOVERED;
-    });
-
-    this.puzzle.occupiedTiles.set(tiles);
-  }
-
-  private getHoveredCellIds(pieceRect: DOMRect): Element[] {
-    const hoveredCells: Element[] = [];
+  private setHoveredCells(pieceRect: DOMRect): void {
+    this.hoveredCells = [];
     const piece = this.piece();
     const halfCellSize = this.gridSize / 2;
 
@@ -108,23 +93,14 @@ export class PuzzlePieceComponent {
             .elementsFromPoint(cellX, cellY)
             .filter((v) => v.classList.contains('is-part-of-map'));
 
-          if (tiles.length === 0) return [];
+          if (tiles.length === 0) return;
           if (tiles.length > 1)
             throw new Error('Unexpectedly found multiple board-cells');
 
-          hoveredCells.push(tiles[0]);
+          this.hoveredCells.push(tiles[0]);
         }
       }
     }
-
-    return hoveredCells;
-  }
-
-  onDrop(): void {
-    this.dragPosition = { x: 0, y: 0 };
-
-    // TODO check if tiles are not occupied already before set isOccupied state
-    this.updateHoveredTiles(PuzzleTileState.IS_OCCUPIED);
   }
 
   private updateHoveredTiles(state: PuzzleTileState) {
@@ -140,5 +116,45 @@ export class PuzzlePieceComponent {
     });
 
     this.puzzle.occupiedTiles.set(tiles);
+  }
+
+  private setHoveredCellsState(pieceRect: DOMRect): void {
+    const tiles: PuzzleGrid = this.puzzle
+      .occupiedTiles()
+      .map((x) => Object.assign([], x));
+
+    this.hoveredCells.forEach((cellElement: Element) => {
+      const id = cellElement.getAttribute('id');
+      if (!id) throw new Error('Board cell attribute id is null');
+      const row = Number(id.split('-')[1]) - 1;
+      const col = Number(id.split('-')[2]) - 1;
+
+      if (tiles[row][col] === PuzzleTileState.TILE) {
+        tiles[row][col] = PuzzleTileState.IS_HOVERED;
+      }
+    });
+
+    this.puzzle.occupiedTiles.set(tiles);
+  }
+
+  onDrop(): void {
+    this.dragPosition = { x: 0, y: 0 };
+    const isReadyToPlace = this.checkForOccupiedTiles(this.hoveredCells);
+    this.hoveredCells = [];
+
+    if (isReadyToPlace) {
+      // TODO: change update hovered tiles to insert puzzle piece instance on grid
+      this.updateHoveredTiles(PuzzleTileState.IS_OCCUPIED);
+    } else {
+      this.updateHoveredTiles(PuzzleTileState.TILE);
+    }
+  }
+
+  private checkForOccupiedTiles(cells: Element[]): boolean {
+    const occupiedTiles = cells.filter((t) =>
+      t.classList.contains('is-occupied')
+    );
+    const hasOccupiedTiles = occupiedTiles.length > 0;
+    return !hasOccupiedTiles;
   }
 }
