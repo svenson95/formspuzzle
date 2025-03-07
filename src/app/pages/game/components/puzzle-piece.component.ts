@@ -1,4 +1,4 @@
-import { CdkDrag, CdkDragEnd, CdkDragMove } from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragMove } from '@angular/cdk/drag-drop';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -6,7 +6,6 @@ import {
   input,
 } from '@angular/core';
 
-import { EMPTY_MAP } from '../../../data';
 import { PuzzleGrid, PuzzleTileState } from '../../../models';
 import { PuzzleService } from '../../../services';
 
@@ -42,7 +41,7 @@ import { PuzzleService } from '../../../services';
       cdkDrag
       [cdkDragFreeDragPosition]="dragPosition"
       (cdkDragMoved)="onDrag($event)"
-      (cdkDragEnded)="onDrop($event)"
+      (cdkDragEnded)="onDrop()"
     >
       @for (row of piece(); track $index) {
       <div class="row">
@@ -70,14 +69,17 @@ export class PuzzlePieceComponent {
   dragPosition = { x: 0, y: 0 };
 
   onDrag(event: CdkDragMove): void {
-    const pieceElement = event.source.element.nativeElement;
-    const pieceRect = pieceElement.getBoundingClientRect();
+    const { nativeElement } = event.source.element;
+    const pieceRect = nativeElement.getBoundingClientRect();
 
-    this.updateOccupiedTiles(pieceRect);
+    this.updateHoveredTiles(PuzzleTileState.TILE);
+    this.setHoveredCellsState(pieceRect);
   }
 
-  private updateOccupiedTiles(pieceRect: DOMRect) {
-    const tiles: PuzzleGrid = EMPTY_MAP.grid.map((x) => Object.assign([], x));
+  private setHoveredCellsState(pieceRect: DOMRect): void {
+    const tiles: PuzzleGrid = this.puzzle
+      .occupiedTiles()
+      .map((x) => Object.assign([], x));
 
     this.getHoveredCellIds(pieceRect).forEach((cell: Element) => {
       const id = cell.getAttribute('id');
@@ -118,7 +120,25 @@ export class PuzzlePieceComponent {
     return hoveredCells;
   }
 
-  onDrop(event: CdkDragEnd): void {
-    // should align the piece into the grid
+  onDrop(): void {
+    this.dragPosition = { x: 0, y: 0 };
+
+    // TODO check if tiles are not occupied already before set isOccupied state
+    this.updateHoveredTiles(PuzzleTileState.IS_OCCUPIED);
+  }
+
+  private updateHoveredTiles(state: PuzzleTileState) {
+    const occupiedTiles = this.puzzle.occupiedTiles();
+    const tilesCopy = occupiedTiles.map((x) => Object.assign([], x));
+    const tiles = tilesCopy.map((row) => {
+      return row.map((cell) => {
+        if (cell === PuzzleTileState.IS_HOVERED) {
+          return state;
+        }
+        return cell;
+      });
+    });
+
+    this.puzzle.occupiedTiles.set(tiles);
   }
 }

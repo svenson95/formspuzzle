@@ -46,13 +46,17 @@ import { PuzzleService } from '../services';
         height: var(--fp-grid-small);
       }
 
-      &.is-part-of-map {
+      &.is-part-of-map:not(.is-occupied) {
         background-color: #ddd;
         border: 1px solid #ccc;
       }
 
       &.is-hovered.is-part-of-map {
         background-color: #ccc;
+      }
+
+      &.is-occupied.is-part-of-map {
+        background-color: var(--ion-color-primary);
       }
     }
   `,
@@ -66,6 +70,7 @@ import { PuzzleService } from '../services';
           [id]="'cell-' + (rowIndex + 1) + '-' + (colIndex + 1)"
           [class.is-part-of-map]="cell === PuzzleTileState.TILE"
           [class.is-hovered]="isHovered(rowIndex, colIndex)"
+          [class.is-occupied]="isOccupied(rowIndex, colIndex)"
         ></div>
         }
       </div>
@@ -89,8 +94,18 @@ export class PuzzleBoardComponent {
   }
 
   isHovered(row: number, col: number): boolean {
+    const tile = this.getTile(row, col);
+    return tile === PuzzleTileState.IS_HOVERED ? true : false;
+  }
+
+  isOccupied(row: number, col: number): boolean {
+    const tile = this.getTile(row, col);
+    return tile === PuzzleTileState.IS_OCCUPIED ? true : false;
+  }
+
+  private getTile(row: number, col: number): PuzzleTileState {
     const tiles = this.occupiedTiles();
-    if (!tiles) return false;
-    return tiles[row][col] === PuzzleTileState.IS_HOVERED ? true : false;
+    if (!tiles) return PuzzleTileState.NONE;
+    return tiles[row][col];
   }
 }
