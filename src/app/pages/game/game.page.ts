@@ -26,7 +26,7 @@ import { PuzzleFormsComponent } from './components';
       <div>00:00</div>
     </section>
     <fp-puzzle-board [map]="selectedMap()" />
-    <fp-puzzle-forms [grid]="selectedMap().grid" />
+    <fp-puzzle-forms />
   `,
   host: {
     'data-testid': 'game-page-root',
@@ -37,14 +37,16 @@ import { PuzzleFormsComponent } from './components';
 })
 export class GamePage {
   puzzle = inject(PuzzleService);
+
   selectedMap = computed<PuzzleMap>(() => {
     const map = this.puzzle.selectedMap();
-    if (map === undefined) {
-      const stored = localStorage.getItem('selected-map');
-      const storedMap = PUZZLE_MAPS.find((p) => p.name === stored);
-      if (storedMap) return storedMap;
-      throw new Error('Map should be defined in game page');
-    }
-    return map;
+    return map ? map : this.getMapFromLocalStorage();
   });
+
+  private getMapFromLocalStorage(): PuzzleMap {
+    const stored = localStorage.getItem('selected-map');
+    const storedMap = PUZZLE_MAPS.find((p) => p.name === stored);
+    if (storedMap) return storedMap;
+    throw new Error('Map should be defined in game page');
+  }
 }

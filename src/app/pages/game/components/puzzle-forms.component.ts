@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 
-import { PuzzleGrid } from '../../../models';
+import { PUZZLE_PIECES } from '../../../data';
 
 import { PuzzlePieceComponent } from './puzzle-piece.component';
 
@@ -13,7 +13,7 @@ import { PuzzlePieceComponent } from './puzzle-piece.component';
   `,
   template: `
     @for (piece of pieces; track $index) {
-    <fp-puzzle-piece [piece]="piece" [grid]="grid()" />
+    <fp-puzzle-piece [piece]="piece" />
     }
   `,
   selector: 'fp-puzzle-forms',
@@ -21,27 +21,5 @@ import { PuzzlePieceComponent } from './puzzle-piece.component';
   imports: [PuzzlePieceComponent],
 })
 export class PuzzleFormsComponent {
-  grid = input.required<PuzzleGrid>();
-
-  readonly pieces = [
-    [
-      [0, 1, 0, 0],
-      [1, 1, 1, 0],
-      [0, 1, 0, 0],
-    ],
-    [
-      [1, 0, 0],
-      [1, 1, 1],
-    ],
-    [
-      [1, 0, 0],
-      [1, 1, 1],
-      [0, 1, 0],
-    ],
-    [
-      [0, 0, 0],
-      [1, 1, 0],
-      [1, 1, 1],
-    ],
-  ];
+  readonly pieces = PUZZLE_PIECES;
 }
